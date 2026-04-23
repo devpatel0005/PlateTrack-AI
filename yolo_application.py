@@ -1,25 +1,93 @@
 import streamlit as st
 import os
 import cv2
+import subprocess
+import imageio_ffmpeg as iio_ffmpeg
+import easyocr
 from ultralytics import YOLO
-import numpy as np
 
-st.title("YOLO image and vedio Processing.")
+st.set_page_config(page_title="PlateTrack AI", page_icon="AI", layout="wide")
+
+st.title("PlateTrack AI")
+st.subheader("AI-powered vehicle license plate detection and OCR from images and videos")
+
+st.sidebar.title("Project Info")
+st.sidebar.markdown("**Author:** Dev Dharmesh Patel")
+st.sidebar.markdown("**Mail:** devdpatel0005@gmail.com")
+st.sidebar.markdown("**GitHub:** https://github.com/devpatel0005")
+st.sidebar.markdown("---")
+st.sidebar.markdown("**Tech Stack**")
+st.sidebar.markdown("- Python")
+st.sidebar.markdown("- Streamlit")
+st.sidebar.markdown("- YOLO (Ultralytics)")
+st.sidebar.markdown("- OpenCV")
+st.sidebar.markdown("- EasyOCR")
+st.sidebar.markdown("- FFmpeg")
+st.sidebar.markdown("---")
+st.sidebar.markdown("**License**")
+st.sidebar.markdown("All Rights Reserved")
+st.sidebar.markdown("No reuse or redistribution without written permission.")
+st.sidebar.markdown("Contact: devdpatel0005@gmail.com")
+st.sidebar.markdown("---")
+st.sidebar.markdown("**Use Cases**")
+st.sidebar.markdown("- Parking access automation")
+st.sidebar.markdown("- Traffic monitoring")
+st.sidebar.markdown("- Fleet entry logs")
+
+st.divider()
 
 # Allow users to upload images or videos
-uploaded_file = st.file_uploader("Upload an image or video", type=["jpg", "jpeg", "png", "bmp", "mp4", "avi", "mov", "mkv"])
+uploaded_file = st.file_uploader("Upload an image or video to detect number plates and extract text.", type=["jpg", "jpeg", "png", "bmp", "mp4", "avi", "mov", "mkv"])
 
 # Load the model with giving the weights in which we ran our model in the notebook
 
 model=YOLO('D:\\vscode\\Automatic-Car-Numberplate-Recognition-System\\models\\best.pt')
 
 
+@st.cache_resource
+def get_ocr_reader():
+    return easyocr.Reader(['en'], gpu=False)
 
-# Prediction function for the images will take the image , will make the predictions and save the image and returns the output folder 
+
+def create_web_preview_video(input_video_path):
+    """Create a browser-friendly MP4 preview using FFmpeg (H.264 + yuv420p)."""
+    preview_path = f"{os.path.splitext(input_video_path)[0]}_web.mp4"
+    ffmpeg_exe = iio_ffmpeg.get_ffmpeg_exe()
+    cmd = [
+        ffmpeg_exe,
+        "-y",
+        "-i",
+        input_video_path,
+        "-c:v",
+        "libx264",
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
+        "-c:a",
+        "aac",
+        preview_path,
+    ]
+
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as exc:
+        error_message = exc.stderr.strip() if exc.stderr else "Unknown FFmpeg error"
+        st.error(f"FFmpeg conversion failed: {error_message}")
+        return None
+
+    if not os.path.exists(preview_path):
+        st.error("FFmpeg did not create the preview video.")
+        return None
+
+    return preview_path
+
 def predict_and_save_image(path_test_car, output_image_path):
     results= model.predict(path_test_car,device='cpu')
     image=cv2.imread(path_test_car)
     image=cv2.cvtColor(image,cv2.COLOR_BGR2RGB) # Conver the image into the RGB format deafault format is BGR
+    detected_texts = []
+    ocr_reader = get_ocr_reader()
     
     # Now we need to format the predicts stored inside the result
     for result in results:
@@ -31,9 +99,18 @@ def predict_and_save_image(path_test_car, output_image_path):
             # now we will write confidence score on the image with custom font
             cv2.putText(image, f'{confidence*100:.2f}%', (x1, y1 - 10), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
+
+            roi = image[y1:y2, x1:x2]
+            if roi.size > 0:
+                text_parts = ocr_reader.readtext(roi, detail=0)
+                if text_parts:
+                    text = " ".join(text_parts).strip()
+                    if text:
+                        detected_texts.append(text)
     
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # convert to default format
     cv2.imwrite(output_image_path, image)
+    st.session_state['ocr_texts'] = detected_texts
     return output_image_path
 
 
@@ -60,7 +137,7 @@ def predict_and_plot_video(video_path,output_path):
     
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
-    
+
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
@@ -95,6 +172,7 @@ def process_media(input_path, output_path):
     """
     file_extension = os.path.splitext(input_path)[1].lower()
     if file_extension in ['.mp4', '.avi', '.mov', '.mkv']:
+        st.session_state['ocr_texts'] = []
         return predict_and_plot_video(input_path, output_path)
     elif file_extension in ['.jpg', '.jpeg', '.png', '.bmp']:
         return predict_and_save_image(input_path, output_path)
@@ -116,9 +194,46 @@ if uploaded_file is not None:
     result_path = process_media(input_path, output_path)
     if result_path:
         if input_path.endswith(('.mp4', '.avi', '.mov', '.mkv')):
-            video_file = open(result_path, 'rb')
-            video_bytes = video_file.read()
-            st.video(video_bytes)
+            left_spacer, video_col, right_spacer = st.columns([1, 2, 1])
+            preview_path = create_web_preview_video(result_path)
+            if preview_path:
+                with video_col:
+                    st.video(preview_path)
+            else:
+                with open(result_path, 'rb') as video_file:
+                    video_bytes = video_file.read()
+                with video_col:
+                    st.video(video_bytes)
         else:
             st.image(result_path)
+            ocr_texts = st.session_state.get('ocr_texts', [])
+            if ocr_texts:
+                st.write("Detected text from number plate:")
+                for text in ocr_texts:
+                    st.write(text)
+
+st.markdown(
+    """
+    <style>
+    .app-footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        padding: 8px 12px;
+        background: rgba(0, 0, 0, 0.45);
+        color: #c9ced6;
+        font-size: 13px;
+        z-index: 999;
+        backdrop-filter: blur(2px);
+    }
+    .block-container {
+        padding-bottom: 48px;
+    }
+    </style>
+    <div class="app-footer">Copyright (c) 2026 Dev Dharmesh Patel. All Rights Reserved.</div>
+    """,
+    unsafe_allow_html=True,
+)
  

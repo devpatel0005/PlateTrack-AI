@@ -4,5 +4,6 @@ matplotlib
 opencv-python
 streamlit
 ultralytics
-os
+easyocr
+imageio-ffmpeg
 
