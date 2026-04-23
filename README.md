@@ -20,7 +20,7 @@ PlateTrack AI is an end-to-end Automatic Number Plate Recognition (ANPR) project
 - Video inference frame-by-frame with bounding box overlays
 - OCR extraction of detected plate text from image regions (EasyOCR)
 - Browser-friendly video output conversion using FFmpeg
-- Resume-ready Streamlit frontend with project info, stack, and use cases
+- Streamlit frontend with project info, stack, and use cases
 
 ## Tech Stack
 - Python
@@ -94,7 +94,7 @@ Then open the Streamlit URL shown in terminal and upload:
 - OCR text output for image-based detections
 - Converted preview video in `output/` for browser playback
 
-## Resume Highlights (You Can Reuse)
+## Project Highlights 
 - Built an end-to-end ANPR pipeline using YOLO for object detection and EasyOCR for text recognition.
 - Converted raw annotation formats into YOLO-ready datasets and trained a custom detection model.
 - Developed a Streamlit-based inference app for image and video uploads with real-time visual outputs.
