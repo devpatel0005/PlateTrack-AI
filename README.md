@@ -1,18 +1,19 @@
 # PlateTrack AI
 
-AI-powered vehicle license plate detection and OCR system built with YOLO, OpenCV, EasyOCR, and Streamlit.
+An end-to-end, production-ready AI system for automatic vehicle license plate detection and text extraction, powered by YOLO, OpenCV, and EasyOCR.
 
-This project detects license plates from images and videos, draws bounding boxes with confidence scores, extracts plate text, and serves results through an interactive web interface.
+PlateTrack AI takes you from model training to real-world deployment: it detects plates in images and videos, performs OCR with high accuracy, and delivers results through a deployed interactive web application.
 
-## Author
-- Dev Dharmesh Patel
-- Email: devdpatel190905@gmail.com
-- GitHub: https://github.com/devpatel0005
+## Deployed Project
+- Status: Successfully deployed
+- Live Demo: [Add your deployed project URL here](#)
+
 
 ## Project Overview
-PlateTrack AI is an end-to-end Automatic Number Plate Recognition (ANPR) project with two major parts:
+PlateTrack AI is a completed end-to-end Automatic Number Plate Recognition (ANPR) project with three major parts:
 1. Model development workflow in notebook for dataset preparation, training, and evaluation.
-2. Production-style Streamlit UI for inference on uploaded media (images/videos).
+2. Streamlit UI for inference on uploaded media (images/videos).
+3. Deployment of the application for live web access.
 
 ## Key Features
 - License plate detection using trained YOLO model (`models/best.pt`)
@@ -21,6 +22,7 @@ PlateTrack AI is an end-to-end Automatic Number Plate Recognition (ANPR) project
 - OCR extraction of detected plate text from image regions (EasyOCR)
 - Browser-friendly video output conversion using FFmpeg
 - Streamlit frontend with project info, stack, and use cases
+- Deployed web application for real-world usage and demo access
 
 ## Tech Stack
 - Python
@@ -34,18 +36,30 @@ PlateTrack AI is an end-to-end Automatic Number Plate Recognition (ANPR) project
 ## Repository Structure
 ```text
 Automatic-Car-Numberplate-Recognition-System/
+|-- .gitignore
 |-- yolo_application.py
 |-- requirements.txt
 |-- README.md
 |-- LICENSE
+|-- datasets/
+|   |-- annotations/
+|   |-- images/
+|   `-- demo.mp4
 |-- models/
 |   `-- best.pt
 |-- notebooks/
 |   `-- Car Numberplate Detection.ipynb
 |-- output/
+|   |-- demo.mp4
+|   |-- demo_web.mp4
+|   `-- images.jpeg
 |-- temp/
-|-- datasets/
-`-- demo.mp4
+|   |-- demo.mp4
+|   `-- images.jpeg
+|-- test/
+|   |-- demo.mp4
+|   `-- images.jpeg
+`-- yoloenv/
 ```
 
 ## How It Works
@@ -100,6 +114,14 @@ Then open the Streamlit URL shown in terminal and upload:
 - Developed a Streamlit-based inference app for image and video uploads with real-time visual outputs.
 - Implemented robust media processing and browser-compatible video rendering using FFmpeg.
 
+## Future Improvements
+In a production-scale next phase, I would integrate this deployed license plate detection system with CCTV streams using RTSP (Real-Time Streaming Protocol). Each frame would be processed in real time using YOLO for detection and OCR for text extraction. To optimize performance, I would add object tracking to avoid redundant OCR on the same vehicle across consecutive frames, then store detections in a database with timestamps and camera identifiers. The pipeline would be exposed through APIs and monitored through a dashboard for live events, search, and analytics.
+
 ## License
 This project is proprietary and licensed under an All Rights Reserved license.
 See `LICENSE` for full terms.
+
+## Author
+- Dev Dharmesh Patel
+- Email: devdpatel190905@gmail.com
+- GitHub: https://github.com/devpatel0005

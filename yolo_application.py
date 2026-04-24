@@ -40,8 +40,9 @@ st.divider()
 uploaded_file = st.file_uploader("Upload an image or video to detect number plates and extract text.", type=["jpg", "jpeg", "png", "bmp", "mp4", "avi", "mov", "mkv"])
 
 # Load the model with giving the weights in which we ran our model in the notebook
-
-model=YOLO('D:\\vscode\\Automatic-Car-Numberplate-Recognition-System\\models\\best.pt')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "models", "best.pt")
+model = YOLO(MODEL_PATH)
 
 
 @st.cache_resource
@@ -189,13 +190,15 @@ if uploaded_file is not None:
     output_path=f"output/{uploaded_file.name}"
     with open(input_path,'wb') as f:
         f.write(uploaded_file.getbuffer())
-    st.write("Processing....")
+    preview_path = None
+    with st.spinner("Processing..."):
+        result_path = process_media(input_path, output_path)
+        if result_path and input_path.endswith(('.mp4', '.avi', '.mov', '.mkv')):
+            preview_path = create_web_preview_video(result_path)
 
-    result_path = process_media(input_path, output_path)
     if result_path:
         if input_path.endswith(('.mp4', '.avi', '.mov', '.mkv')):
             left_spacer, video_col, right_spacer = st.columns([1, 2, 1])
-            preview_path = create_web_preview_video(result_path)
             if preview_path:
                 with video_col:
                     st.video(preview_path)
