@@ -117,11 +117,11 @@ Then open the Streamlit URL shown in terminal and upload:
 ## Future Improvements
 In a production-scale next phase, I would integrate this deployed license plate detection system with CCTV streams using RTSP (Real-Time Streaming Protocol). Each frame would be processed in real time using YOLO for detection and OCR for text extraction. To optimize performance, I would add object tracking to avoid redundant OCR on the same vehicle across consecutive frames, then store detections in a database with timestamps and camera identifiers. The pipeline would be exposed through APIs and monitored through a dashboard for live events, search, and analytics.
 
-## License
-This project is proprietary and licensed under an All Rights Reserved license.
-See `LICENSE` for full terms.
-
 ## Author
 - Dev Dharmesh Patel
 - Email: devdpatel190905@gmail.com
 - GitHub: https://github.com/devpatel0005
+
+## License
+This project is proprietary and licensed under an All Rights Reserved license.
+See `LICENSE` for full terms.
