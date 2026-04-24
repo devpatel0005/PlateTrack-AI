@@ -2,6 +2,7 @@ import streamlit as st
 import os
 import cv2
 import subprocess
+import tempfile
 import imageio_ffmpeg as iio_ffmpeg
 import easyocr
 from ultralytics import YOLO
@@ -43,6 +44,12 @@ uploaded_file = st.file_uploader("Upload an image or video to detect number plat
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "best.pt")
 model = YOLO(MODEL_PATH)
+
+APP_TEMP_DIR = os.path.join(tempfile.gettempdir(), "platetrack_ai")
+INPUT_DIR = os.path.join(APP_TEMP_DIR, "input")
+OUTPUT_DIR = os.path.join(APP_TEMP_DIR, "output")
+os.makedirs(INPUT_DIR, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 @st.cache_resource
@@ -186,8 +193,9 @@ def process_media(input_path, output_path):
 
 # here we are saving the uploaded image in the temp directory 
 if uploaded_file is not None:
-    input_path=f"temp/{uploaded_file.name}"
-    output_path=f"output/{uploaded_file.name}"
+    safe_name = os.path.basename(uploaded_file.name)
+    input_path = os.path.join(INPUT_DIR, safe_name)
+    output_path = os.path.join(OUTPUT_DIR, safe_name)
     with open(input_path,'wb') as f:
         f.write(uploaded_file.getbuffer())
     preview_path = None
