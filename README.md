@@ -62,6 +62,19 @@ Automatic-Car-Numberplate-Recognition-System/
 `-- yoloenv/
 ```
 
+## Dataset
+
+- **Total images:** 433 (`datasets/images`)
+- **Total annotations:** 433 Pascal VOC XML files (`datasets/annotations`)
+- **Annotated images:** 433 (0 without annotations)
+- **Total bounding boxes:** 471
+- **Classes:** `licence` (471 instances)
+- **Boxes per image:** min 1, max 6, mean 1.09, median 1
+- **Top image resolutions (sample):** 400×300 (64), 400×267 (50), 400×225 (47)
+- **Parsing errors while analyzing:** 0
+
+This dataset was used to train the YOLO model at `models/best.pt`.
+
 ## How It Works
 ### 1) Detection
 - YOLO model predicts plate bounding boxes (`x1, y1, x2, y2`) and confidence.
