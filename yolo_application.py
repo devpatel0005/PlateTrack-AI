@@ -89,6 +89,18 @@ def create_web_preview_video(input_video_path):
         return None
 
     return preview_path
+"""
+The create_web_preview_video() function uses FFmpeg to convert any uploaded video into a web-optimized MP4 file:
+Video Codec: H.264 (libx264) — standard for web browsers
+Pixel Format: yuv420p — ensures wide browser compatibility
+Audio Codec: AAC — standard for web
+-movflags +faststart: Optimizes for streaming (starts playing before full download)
+This process ensures that whatever the input, you always serve a video that can be displayed by Streamlit in the user’s browser.
+- A video codec (short for "coder-decoder" or "compressor-decompressor") is a technology or algorithm used to compress and decompress digital video files.
+- H.264 (AVC): The most widely used modern video codec; offers great compression and is supported by nearly all browsers and devices. Used for MP4 files.
+This code saves the video prediction output as an MP4 video using the mp4v codec.
+For browser display, you use FFmpeg to make sure the output is also available as a compatible MP4 (with H.264 video codec).
+"""
 
 def predict_and_save_image(path_test_car, output_image_path):
     results= model.predict(path_test_car,device='cpu')
@@ -121,6 +133,26 @@ def predict_and_save_image(path_test_car, output_image_path):
     st.session_state['ocr_texts'] = detected_texts
     return output_image_path
 
+"""
+easyocr is a deep learning-based OCR library that supports over 80 languages.
+It is known for its simplicity (easy) and accuracy, especially for scene text (like license plates, signs, receipts, etc.).
+It uses PyTorch deep models under the hood (like CRAFT for text detection, CRNN for text recognition).
+
+After YOLO detects a license plate and provides bounding box coordinates, each detected region (the ROI—Region Of Interest, i.e. the license plate cutout) is extracted.
+ocr_reader.readtext(roi, detail=0) runs OCR on just the license plate region.
+Returns a list of detected text strings (text_parts), which you then join and store in detected_texts.
+
+EasyOCR works in two main phases:
+
+A. Text Detection
+Finds where text is in the image (bounding boxes).
+Uses a pretrained deep network (often CRAFT: Character-Region Awareness for Text detection).
+Output: Regions (boxes) likely containing text.
+B. Text Recognition
+For each detected text region, recognizes the actual characters.
+Uses a sequence recognition network, usually CRNN (Convolutional Recurrent Neural Network).
+Output: The readable string for each box.
+"""
 
 # Now prediction for the vedio input 
 # for the vedio we need to predict for every image in a veiod for every frame per second we need to predict on image in vedio
